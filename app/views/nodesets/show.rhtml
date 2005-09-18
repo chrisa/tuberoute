@@ -1,0 +1,8 @@
+<% for column in Nodeset.content_columns %>
+<p>
+  <b><%= column.human_name %>:</b> <%=h @nodeset.send(column.name) %>
+</p>
+<% end %>
+
+<%= link_to 'Edit', :action => 'edit', :id => @nodeset %> |
+<%= link_to 'Back', :action => 'list' %>

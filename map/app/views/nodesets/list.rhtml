@@ -1,0 +1,27 @@
+<h1>Listing nodesets</h1>
+
+<table>
+  <tr>
+  <% for column in Nodeset.content_columns %>
+    <th><%= column.human_name %></th>
+  <% end %>
+  </tr>
+  
+<% for nodeset in @nodesets %>
+  <tr>
+  <% for column in Nodeset.content_columns %>
+    <td><%=h nodeset.send(column.name) %></td>
+  <% end %>
+    <td><%= link_to 'Show', :action => 'show', :id => nodeset %></td>
+    <td><%= link_to 'Edit', :action => 'edit', :id => nodeset %></td>
+    <td><%= link_to 'Destroy', {:action => 'destroy', :id => nodeset}, :confirm => 'Are you sure?' %></td>
+  </tr>
+<% end %>
+</table>
+
+<%= link_to 'Previous page', { :page => @nodeset_pages.current.previous } if @nodeset_pages.current.previous %>
+<%= link_to 'Next page', { :page => @nodeset_pages.current.next } if @nodeset_pages.current.next %> 
+
+<br />
+
+<%= link_to 'New nodeset', :action => 'new' %>

@@ -1,0 +1,4 @@
+ORACLE_BASE=/home/oracle
+ORACLE_HOME=/home/oracle/OraHome1
+
+export ORACLE_HOME ORACLE_BASE

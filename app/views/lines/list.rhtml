@@ -1,0 +1,27 @@
+<h1>Listing lines</h1>
+
+<table>
+  <tr>
+  <% for column in Line.content_columns %>
+    <th><%= column.human_name %></th>
+  <% end %>
+  </tr>
+  
+<% for line in @lines %>
+  <tr>
+  <% for column in Line.content_columns %>
+    <td><%=h line.send(column.name) %></td>
+  <% end %>
+    <td><%= link_to 'Show', :action => 'show', :id => line %></td>
+    <td><%= link_to 'Edit', :action => 'edit', :id => line %></td>
+    <td><%= link_to 'Destroy', {:action => 'destroy', :id => line}, :confirm => 'Are you sure?' %></td>
+  </tr>
+<% end %>
+</table>
+
+<%= link_to 'Previous page', { :page => @line_pages.current.previous } if @line_pages.current.previous %>
+<%= link_to 'Next page', { :page => @line_pages.current.next } if @line_pages.current.next %> 
+
+<br />
+
+<%= link_to 'New line', :action => 'new' %>

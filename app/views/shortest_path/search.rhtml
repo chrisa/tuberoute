@@ -1,0 +1,24 @@
+<h1>Select start and end</h1>
+
+<%= form_tag :controller => 'shortest_path',
+             :action     => 'path' %>
+
+<input id="start_search" name="start_search" type="text" value="">
+<%= observe_field 'start_search', :frequency => 0.5, 
+                                  :update => 'start_id', 
+                                  :url => { :controller => 'shortest_path', :action => 'list', :id_name => 'start_id' }, 
+                                  :with => "'search=' + escape(value)" 
+%>
+
+<input id="end_search" name="end_search" type="text" value="">
+<%= observe_field 'end_search', :frequency => 0.5, 
+                                :update => 'end_id', 
+                                :url => { :controller => 'shortest_path', :action => 'list', :id_name=> 'end_id' }, 
+                                :with => "'search=' + escape(value)" 
+%>
+
+<div id="start_id"></div>
+<div id="end_id"></div>
+
+<%= submit_tag 'find path' %>
+<%= end_form_tag %>

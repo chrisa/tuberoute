@@ -1,0 +1,20 @@
+<h1>Path</h1>
+
+<p>start_id: <%= @start_id %></p>
+<p>end_id: <%= @end_id %></p>
+
+<table>
+  <% for elem in @p.path %>
+  <tr>
+    <td><%= elem.name      %></td>
+    <td><%= elem.line_name %></td>
+    <td><%= elem.direction %></td>
+    <td><%= elem.nods_id   %></td>
+    <td><%= elem.node_id   %></td>    
+    <td><%= elem.edge_id   %></td>    
+    <td><%= elem.node_osx  %></td>    
+    <td><%= elem.node_osy  %></td>    
+  </tr>
+  <% end %>
+</table>
+

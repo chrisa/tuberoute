@@ -1,0 +1,10 @@
+<table>
+<% for nodeset in @nodesets %>
+  <tr>
+  <% for column in Nodeset.content_columns %>
+    <td><%=h nodeset.nods_name %></td>
+    <td><%= hidden_field_tag @id_name, nodeset.nods_id %></td>
+  <% end %>
+  </tr>
+<% end %>
+</table>

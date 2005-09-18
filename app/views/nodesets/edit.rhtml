@@ -1,0 +1,9 @@
+<h1>Editing nodeset</h1>
+
+<%= start_form_tag :action => 'update', :id => @nodeset %>
+  <%= render_partial 'form' %>
+  <%= submit_tag 'Edit' %>
+<%= end_form_tag %>
+
+<%= link_to 'Show', :action => 'show', :id => @nodeset %> |
+<%= link_to 'Back', :action => 'list' %>
