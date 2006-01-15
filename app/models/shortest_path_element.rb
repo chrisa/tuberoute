@@ -15,4 +15,9 @@ class ShortestPathElement
     @node_osy    = r[7]
   end
 
+  def ShortestPathElement.new_by_node_id(id)
+    node = Node.find(id)
+    r = [ id, node.node_nods_id, node.node_name || node.nodeset.nods_name, nil, nil, nil, node.node_osx, node.node_osy ]
+    return new(r)    
+  end
 end

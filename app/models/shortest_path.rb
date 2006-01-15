@@ -1,27 +1,26 @@
 require 'shortest_path_element'
+require 'drb'
+
 class ShortestPath
 
   attr_reader :path
   
-  def initialize(start_id, end_id)
+  def initialize(start_nods_id, end_nods_id)
     @path     = Array.new
-    @start_id = start_id
-    @end_id   = end_id
+    @start_id = Nodeset.find(start_nods_id).nodes[0].node_id
+    @end_id   = Nodeset.find(end_nods_id).nodes[0].node_id
+
+    DRb.start_service()
+    @map = DRbObject.new(nil, 'druby://localhost:9000')
   end
   
   def calc
-    dbh = ActiveRecord::Base.connection.connection
-    plsql = dbh.parse("BEGIN dijkstra.nodeset_sssp(:start_id, :end_id, :cursor); END;")
-    plsql.bind_param(':start_id', @start_id)
-    plsql.bind_param(':end_id', @end_id)
-    plsql.bind_param(':cursor', OCI8::Cursor)
-    plsql.exec
-    cursor = plsql[':cursor']
-    
-    cursor.fetch do |r|
-      elem = ShortestPathElement.new(r)
+    @map.shortest_path(@start_id, @end_id).each do |id|
+      elem = ShortestPathElement.new_by_node_id(id)
       @path.push(elem)
     end
   end
 
 end
+
+

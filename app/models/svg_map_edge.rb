@@ -59,4 +59,12 @@ class SvgMapEdge
 
   end
 
+  def to_s
+    @key
+  end
+
+  def eql?(other)
+    self.to_s.eql?(other.to_s)
+  end
+
 end

@@ -72,7 +72,7 @@ class SvgMap
     seen = Hash.new
     edges = Array.new
     
-    cursor.fetch { |r| 
+    cursor.fetch do |r| 
       edge = SvgMapEdge.new(r) 
   
       if ( !(seen.has_value?(edge.key) && seen[edge.key].has_value?(edge.line)) )
@@ -82,22 +82,17 @@ class SvgMap
           seen[edge.key] = Hash.new
         end
         
-        if (seen[edge.key].has_value?(edge.line))
-          seen[edge.key][edge.line] += 1
-        else
-          seen[edge.key][edge.line] = 1
-        end
-        
-      end
-      
-    }
+        seen[edge.key][edge.line] = 1
+
+     end
+    end
     
     x_factor = @w.to_f / (@x2.to_i - @x1.to_i);
     y_factor = @h.to_f / (@y2.to_i - @y1.to_i);
 
     svg = SVG.new(@w, @h)
 
-    edges.each { |edge|
+    edges.each do |edge|
 
       if (seen[edge.key].length > 1) 
 
@@ -161,13 +156,13 @@ class SvgMap
       map_bx = ( (edge.nbx + x_skew - @x1.to_i) * x_factor )
       map_by = @h.to_i - ( (edge.nby + y_skew - @y1.to_i) * y_factor )
 
-      svg << SVG::Line.new(map_ax, map_ay, map_bx, map_by) {
+      svg << SVG::Line.new(map_ax, map_ay, map_bx, map_by) do
         self.style = SVG::Style.new
         self.style.stroke       = @@colours[edge.line.to_s]
         self.style.stroke_width = @@line_width
-      }
+      end
 
-    }
+    end
     cursor.close
 
     sql = "SELECT DISTINCT NVL(node_name, nods_name), 
@@ -190,31 +185,31 @@ class SvgMap
     cursor.bind_param(':y2', @y2.to_i, Fixnum)
     cursor.exec
     
-    cursor.fetch { |r| 
+    cursor.fetch do |r| 
       node = SvgMapNode.new(r)
       
       map_x = ( (node.os_x - @x1.to_i) * x_factor )
       map_y = @h.to_i - ( (node.os_y - @y1.to_i) * y_factor )
       
-      svg << SVG::Circle.new(map_x, map_y, 3) {
+      svg << SVG::Circle.new(map_x, map_y, 3) do
         self.style = SVG::Style.new
         self.style.stroke       = @@colours['black']
         self.style.fill         = @@colours['white']
         self.style.stroke_width = 2
-      }
+      end
       
-      svg << SVG::Text.new((map_x + 8), 
-                           (map_y - 6),
-                           # ick!
-                           node.name.gsub(/&/, '&amp;')) {
-        self.style = SVG::Style.new
-        self.style.font         = 'sans-serif'
-        self.style.stroke       = @@colours['black']
-        self.style.font_size    = 10
-        self.style.stroke_width = 0.1
-      }
+#       svg << SVG::Text.new((map_x + 8), 
+#                            (map_y - 6),
+#                            # ick!
+#                            node.name.gsub(/&/, '&amp;')) do
+#         self.style = SVG::Style.new
+#         self.style.font         = 'sans-serif'
+#         self.style.stroke       = @@colours['black']
+#         self.style.font_size    = 10
+#         self.style.stroke_width = 0.1
+#       end
       
-    }
+    end
     
     return svg.to_s
 
