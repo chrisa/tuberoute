@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'oci8'
+require 'drb'
 require 'rubygems'
 require_gem 'PriorityQueue'
 
@@ -32,6 +33,55 @@ class Map
   attr_reader :nodes
   def initialize 
     @nodes = Hash.new
+    load_map
+    end
+
+  def load_map
+
+    conn = OCI8.new 'map', 'map', 'MUNKYII'
+    
+    # get all the node names and ids
+    cursor = conn.exec('SELECT node_id, 
+                           nvl(node_name, nods_name)||\' \'||line_name
+                      FROM nodes, 
+                           nodesets,
+                           node_lines,
+                           lines
+                     WHERE node_nods_id = nods_id
+                       AND node_id = nodl_node_id
+                       AND line_id = nodl_line_id')
+    cursor.fetch do |r|
+      add_node Node.new(r[0], r[1])
+    end
+    cursor.close
+    
+    # get all the edges and weights
+    cursor = conn.exec('SELECT edge_node_a_id,
+                           edge_node_b_id,
+                           (SELECT edgw_weight
+                              FROM edge_weights
+                             WHERE edgw_edge_id = edge_id
+                               AND edgw_weig_id = 1
+                               AND ROWNUM = 1) as time
+                      FROM edges
+                     WHERE edge_edgt_id = 1')
+    cursor.fetch do |r|
+      add_node_neighbour r[0], Edge.new(r[1], r[2], 1)
+    end
+    cursor.close
+    
+    # get all the edges within stations, weighted higher.
+    cursor = conn.exec('SELECT edge_node_a_id,
+                           edge_node_b_id,
+                           10 as time
+                      FROM edges
+                     WHERE edge_edgt_id = 2')
+    cursor.fetch do |r|
+      add_node_neighbour r[0], Edge.new(r[1], r[2], 1)
+    end
+    cursor.close
+    
+    conn.logoff
   end
 
   def add_node(n)
@@ -84,61 +134,10 @@ class Map
       nil
     end
   end
-end
 
-puts "%10.6f" % Time.now.to_f
+end
 
 map = Map.new
-conn = OCI8.new 'map', 'map', 'MUNKYII'
+DRb.start_service('druby://localhost:9000', map)
+DRb.thread.join
 
-# get all the node names and ids
-cursor = conn.exec('SELECT node_id, 
-                           nvl(node_name, nods_name)||\' \'||line_name
-                      FROM nodes, 
-                           nodesets,
-                           node_lines,
-                           lines
-                     WHERE node_nods_id = nods_id
-                       AND node_id = nodl_node_id
-                       AND line_id = nodl_line_id')
-cursor.fetch do |r|
-  map.add_node Node.new(r[0], r[1])
-end
-cursor.close
-
-# get all the edges and weights
-cursor = conn.exec('SELECT edge_node_a_id,
-                           edge_node_b_id,
-                           (SELECT edgw_weight
-                              FROM edge_weights
-                             WHERE edgw_edge_id = edge_id
-                               AND edgw_weig_id = 1
-                               AND ROWNUM = 1) as time
-                      FROM edges
-                     WHERE edge_edgt_id = 1')
-cursor.fetch do |r|
-  map.add_node_neighbour r[0], Edge.new(r[1], r[2], 1)
-end
-cursor.close
-
-# get all the edges within stations, weighted higher.
-cursor = conn.exec('SELECT edge_node_a_id,
-                           edge_node_b_id,
-                           10 as time
-                      FROM edges
-                     WHERE edge_edgt_id = 2')
-cursor.fetch do |r|
-  map.add_node_neighbour r[0], Edge.new(r[1], r[2], 1)
-end
-cursor.close
-
-conn.logoff
-
-puts "%10.6f" % Time.now.to_f
-
-to, from = ARGV[0..1].map { |id| id.to_i }
-map.shortest_path(to, from).each do |id|
-  puts map.nodes[id].name
-end
-
-puts "%10.6f" % Time.now.to_f
