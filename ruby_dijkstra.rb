@@ -1,17 +1,8 @@
 #!/usr/bin/ruby
 
 require 'oci8'
-
-class Hash
-  # find the key with the smallest value, delete it and return it
-  def delete_min_value
-    return nil if empty?
-    minkey=min=nil
-    each { |k, v| min, minkey=v, k if !min || v<min }
-    delete(minkey)
-    minkey
-  end
-end
+require 'rubygems'
+require_gem 'PriorityQueue'
 
 class Node
   attr_reader :id, :name, :neighbours
@@ -57,24 +48,25 @@ class Map
     # positions which we have seen, but we are not yet sure about
     # the shortest path to them (the value is length of the path,
     # for delete_min_value):
-    active={start=>0}
+    active = CPriorityQueue.new
+    active[start] = 0
     until active.empty?
       # get the position with the shortest path from the
       # active list
-      cur=active.delete_min_value
-      return prev if cur==stop_at
+      cur = active.delete_min[0]
+      return prev if cur == stop_at
       # for all reachable neighbors of cur, check if we found
       # a shorter path to them
       @nodes[cur].neighbours.each do |n|
-        newlength=prev[cur][1]+n.weight # path to cur length + edge's weight
-        if old=prev[n.to] # was n already visited
+        newlength = prev[cur][1]+n.weight # path to cur length + edge's weight
+        if old = prev[n.to] # was n already visited
           # if we found a longer path, ignore it
           next if newlength>=old[1]
         end
         # (re)add new position to active list
-        active[n.to]=newlength
+        active[n.to] = newlength
         # set new prev and length
-        prev[n.to]=[cur, newlength]
+        prev[n.to] = [cur, newlength]
       end
     end
     prev
